@@ -1,0 +1,17 @@
+{
+  "name": "quanhua92-claude-skills",
+  "owner": {
+    "name": "quanhua92"
+  },
+  "plugins": [
+    {
+      "name": "github-tools",
+      "source": "./plugins/github-tools",
+      "description": "Tools for working with GitHub PRs, issues, and code reviews",
+      "version": "0.1.0",
+      "author": {
+        "name": "quanhua92"
+      }
+    }
+  ]
+}

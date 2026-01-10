@@ -1,0 +1,42 @@
+# Skill-specific temporary files
+*.tmp
+*.log
+*.cache
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test/output files
+test-output/
+tmp/
+temp/
+
+# Node modules (if skills use Node)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build artifacts
+dist/
+build/
+*.min.js

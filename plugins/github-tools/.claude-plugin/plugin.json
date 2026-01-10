@@ -1,0 +1,8 @@
+{
+  "name": "github-tools",
+  "description": "Tools for working with GitHub PRs, issues, and code reviews",
+  "version": "0.1.0",
+  "author": {
+    "name": "quanhua92"
+  }
+}
