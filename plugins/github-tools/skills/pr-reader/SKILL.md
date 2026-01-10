@@ -22,19 +22,47 @@ Activate this skill when the user says:
 - "help me fix PR review feedback"
 - "what did [reviewer] say in PR #X"
 - "parse PR #X review"
+- Provides any GitHub PR URL format:
+  - `https://github.com/{owner}/{repo}/pull/{number}` - Full PR URL
+  - `https://github.com/{owner}/{repo}/pull/{number}#pullrequestreview-{id}` - PR URL with review ID
+  - `#pullrequestreview-{id}` or just `{id}` - Review ID only (with PR context)
 
 ## Workflow
 
+### Step 0: Parse URL (if provided)
+
+When user provides a URL, parse it to extract owner, repo, PR number, and optionally review ID:
+
+**Supported URL formats:**
+- `https://github.com/{owner}/{repo}/pull/{number}` - Full PR URL
+- `https://github.com/{owner}/{repo}/pull/{number}#pullrequestreview-{id}` - PR URL with review ID
+- `#pullrequestreview-{id}` or just `{id}` - Review ID only (requires PR context)
+
+Extract using regex or string parsing:
+```bash
+# Example: https://github.com/quanhua92/buildscale-ai/pull/1#pullrequestreview-3646706772
+# Owner: quanhoa92
+# Repo: buildscale-ai
+# PR: 1
+# Review ID: 3646706772
+```
+
 ### Step 1: Extract Comments
 
-Use the gh CLI to fetch all PR review comments:
+Use the gh CLI to fetch PR review comments. If a specific review ID is provided, fetch only that review's comments:
 
 ```bash
-# Get all review comments from a PR
+# Option A: Get ALL review comments from a PR
 gh api repos/{owner}/{repo}/pulls/{pr_number}/comments > /tmp/pr_comments.json
 
-# Or get review summary
+# Option B: Get a SPECIFIC review's comments (when review ID is provided)
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/comments > /tmp/pr_comments.json
+
+# Option C: Get review summary first
 gh pr view {pr_number} --json title,body,reviews
+
+# Option D: Get review details
+gh api repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}
 ```
 
 ### Step 2: Parse Comments
@@ -156,13 +184,16 @@ Reviewer: gemini-code-assist[bot]
 ## Commands Used
 
 ```bash
-# Extract comments
+# Extract ALL comments from a PR
 gh api repos/{owner}/{repo}/pulls/{number}/comments > /tmp/comments.json
+
+# Extract comments from a SPECIFIC review
+gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}/comments > /tmp/comments.json
 
 # View PR summary
 gh pr view {number}
 
-# Get specific review
+# Get specific review details
 gh api repos/{owner}/{repo}/pulls/{number}/reviews/{review_id}
 
 # Check commit history
@@ -188,10 +219,27 @@ git log --oneline -10
 
 ## Sample Interaction
 
-**User:** "Read PR #1 review from gemini"
+**Example 1: User provides PR URL with review ID**
+
+**User:** "We have the comment id https://github.com/quanhua92/buildscale-ai/pull/1#pullrequestreview-3646706772"
 
 **Claude:**
-1. Extracts comments: `gh api repos/.../pulls/1/comments`
+1. Parses URL: owner=`quanhua92`, repo=`buildscale-ai`, PR=`1`, review_id=`3646706772`
+2. Fetches specific review: `gh api repos/quanhua92/buildscale-ai/pulls/1/reviews/3646706772`
+3. Fetches review comments: `gh api repos/quanhua92/buildscale-ai/pulls/1/reviews/3646706772/comments`
+4. Parses comments (e.g., 5 issues with severity levels)
+5. Creates prioritized TODO list by difficulty
+6. Starts with easiest fix (quick wins)
+7. Updates progress checkboxes
+8. Commits each fix separately
+9. Reports completion: "5/5 issues fixed (100%)"
+
+**Example 2: User provides PR URL only**
+
+**User:** "Read PR #1 from quanhoa92/buildscale-ai"
+
+**Claude:**
+1. Extracts comments: `gh api repos/quanhua92/buildscale-ai/pulls/1/comments`
 2. Parses 6 issues with file locations
 3. Creates prioritized TODO list
 4. Starts with easiest fix (5-minute cleanup)
